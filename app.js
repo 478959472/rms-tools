@@ -13,24 +13,22 @@ fileInput.addEventListener('change', async (event) => {
         const filename = 'temp.txt';
 
         await FS.writeFile(filename, new Uint8Array(fileContent));
+    
         
-        // Create a pointer to store the buffer address
-        const bufferPointer = Module._malloc(4);
-        
-        const read_file = Module.cwrap('read_file', 'number', ['string', 'number']);
-        const length = read_file(filename, bufferPointer);
-
-        // Read the buffer address
-        const bufferAddress = Module.getValue(bufferPointer, 'i32');
-        
-        // Read the content from bufferAddress
-        const result = Module.UTF8ToString(bufferAddress);
-
-        // Free memory
-        Module._free(bufferAddress);
-        Module._free(bufferPointer);
-
-        output.textContent = result;
+        const bufferPtr = Module.ccall(
+            "read_file",
+            "number",
+            ["string"],
+            [filename]
+          );
+        if (bufferPtr !== 0) {
+            const fileContent = Module.UTF8ToString(bufferPtr);
+            console.log("File content:\n", fileContent);
+            output.textContent = fileContent;
+            Module.ccall("free_buffer", null, ["number"], [bufferPtr]);
+          } else {
+            console.error("Failed to read file.");
+          }
         FS.unlink(filename);
     };
 
