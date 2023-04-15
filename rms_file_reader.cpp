@@ -3,14 +3,18 @@
 #include <vector>
 #include <regex>
 #include <string>
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <sstream>
 #include <cstdint>
 #include <filesystem>
 #include <map>
 #include <iterator>
 #include <algorithm>
+#include <experimental/filesystem>
 
-namespace fs = std::filesystem;
+
+namespace fs = std::experimental::filesystem;
+
 
 class RmsMetaData {
 public:
@@ -55,23 +59,24 @@ public:
             fileIn.open(rmsPath, std::ios::binary);
 
             uint8_t b;
-            int identification = getByte(1, fileIn, b);
+            int identification = bytesToInt(getByte(1, fileIn));
+            //int identification = getByte(1, fileIn, b);
 
             rmsEntity.setIdentification(identification);
 
-            int version = getByte(1, fileIn, b);
+            int version = bytesToInt(getByte(1, fileIn));
             rmsEntity.setVersion(version);
 
-            int coding = getByte(1, fileIn, b);
+            int coding = bytesToInt(getByte(1, fileIn));
             rmsEntity.setCoding(coding);
 
-            int fileSize = getByte(4, fileIn, b);
+            int fileSize = bytesToInt(getByte(4, fileIn));
             rmsEntity.setFileSize(fileSize);
 
-            int fileCount = getByte(2, fileIn, b);
+            int fileCount = bytesToInt(getByte(2, fileIn));
             rmsEntity.setFileCount(fileCount);
 
-            int titleSize = getByte(1, fileIn, b);
+            int titleSize = bytesToInt(getByte(1, fileIn));
             rmsEntity.setTitleSize(titleSize);
 
             std::string title = getByteAsString(titleSize, fileIn);
@@ -79,13 +84,13 @@ public:
             std::vector<std::string> listUrl;
             std::map<std::string, std::string> fileParamMap;
             for (int i = 0; i < fileCount; i++) {
-                int fileType = getByte(1, fileIn, b);
+                int fileType = bytesToInt(getByte(1, fileIn));
 
-                int fileNameSize = getByte(1, fileIn, b);
+                int fileNameSize = bytesToInt(getByte(1, fileIn));
 
                 std::string fileName = getByteAsString(fileNameSize, fileIn);
 
-                int fileContentSize = getByte(4, fileIn, b);
+                int fileContentSize = bytesToInt(getByte(4, fileIn));
 
                 std::vector<uint8_t> fileContent = getBytes(fileContentSize, fileIn);
 
@@ -130,6 +135,12 @@ public:
         return static_cast<int>(b);
     }
 
+    std::vector<uint8_t> getByte(int size, std::ifstream& fileInputStream) {
+        std::vector<uint8_t> b(size);
+        fileInputStream.read(reinterpret_cast<char*>(b.data()), size);
+        return b;
+    }
+
     std::string getByteAsString(int size, std::ifstream &fileIn) {
         std::vector<char> chars(size);
         fileIn.read(chars.data(), size);
@@ -142,11 +153,23 @@ public:
         return bytes;
     }
 
+
     void writeFileContent(const std::string &filePath, const std::vector<uint8_t> &content) {
         std::ofstream outFile(filePath, std::ios::binary);
         outFile.write(reinterpret_cast<const char *>(content.data()), content.size());
         outFile.close();
     }
+
+
+    //int identification = bytesToInt(getByte(1, fileInputStream));
+    int bytesToInt(const std::vector<uint8_t>& bytes) {
+        int result = 0;
+        for (const uint8_t byte : bytes) {
+            result = (result << 8) | byte;
+        }
+        return result;
+    }
+
 
     std::string replaceParam(const std::string &str) {
         std::regex regex("#P_\\d+#");
@@ -164,9 +187,9 @@ public:
 
 
 void testRmsAnalyserImpl() {
-    // Change these paths to the appropriate input RMS file and output folder
-    std::string inputRmsFilePath = "path/to/your/input/rms/file.rms";
-    std::string outputFolderPath = "path/to/your/output/folder";
+    // Change these paths to the appropriate input RMS file and output folderF:\workspace\github\rms-tools\app.js
+    std::string inputRmsFilePath = "E:/oss_move_file/rms/file/202303301009/856079168103589461_1680142172045.rms";
+    std::string outputFolderPath = "F:/workspace/github/rms-tools/rms";
 
     try {
         RmsAnalyserImpl analyser(inputRmsFilePath, outputFolderPath);

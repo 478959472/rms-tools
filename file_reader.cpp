@@ -1,14 +1,15 @@
 #define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cstring>
 #include <string>
-#include <emscripten/emscripten.h>
+// #include <emscripten/emscripten.h>
 
 
 extern "C" {
-    EMSCRIPTEN_KEEPALIVE
+    // EMSCRIPTEN_KEEPALIVE
     char* read_file(const char* file_path) {
         std::ifstream file(file_path, std::ios::binary | std::ios::ate);
         if (!file.is_open()) {
@@ -32,27 +33,27 @@ extern "C" {
         }
     }
 
-    EMSCRIPTEN_KEEPALIVE
+    // EMSCRIPTEN_KEEPALIVE
     void free_buffer(char* buffer) {
         delete[] buffer;
     }
 }
 
-// int main()
-// {
-//     system("chcp 65001");
-//     // 用作测试的文本文件路径
-//     const char* file_path = "F:/workspace/github/rms-tools/test.txt";
+int main1()
+{
+    system("chcp 65001");
+    // 用作测试的文本文件路径
+    const char* file_path = "F:/workspace/github/rms-tools/test.txt";
 
-//     // Pass buffer size to read_file function
-//     char* buffer = read_file(file_path);
+    // Pass buffer size to read_file function
+    char* buffer = read_file(file_path);
 
-//     if (sizeof(buffer) > 0) {
-//         std::cout << "File content:\n" << buffer << std::endl;
-//         free_buffer(buffer);
-//     }
-//     else {
-//         std::cerr << "Failed to read file." << std::endl;
-//     }
-//     return 0;
-// }
+    if (sizeof(buffer) > 0) {
+        std::cout << "File content:\n" << buffer << std::endl;
+        free_buffer(buffer);
+    }
+    else {
+        std::cerr << "Failed to read file." << std::endl;
+    }
+    return 0;
+}
