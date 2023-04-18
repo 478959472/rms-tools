@@ -2,21 +2,23 @@ const fileInput = document.getElementById("file-input");
 const output = document.getElementById("output");
 
 function addImage(elementId, fileName) {
-    const reader = new FileReader();
-    FS.readFile(fileName, { encoding: 'utf8' }, function(err, data) {
-        if (err) throw err;
-        console.log(data);
-      });
-    reader.onload = () => {
-        const url = URL.createObjectURL(new Blob([reader.result], { type: file.type }));
-        // 找到 id 为 "preview" 的 div 元素
-        const previewDiv = document.getElementById(elementId);
-        const img = document.createElement("img");
-        img.src = url;
-        previewDiv.appendChild(img);
-    };
-    FS.FileReader
-    reader.readAsArrayBuffer(fileName);
+  console.log("addText：", fileName);
+  const bufferSize = 2 * 1024 * 1024;
+  const buffer = Module._malloc(bufferSize);
+  const fileSize = Module.ccall(
+    "readFile",
+    "number",
+    ["string", 'number'],
+    [fileName, buffer]
+  );
+  var imageBuffer = new Uint8Array(Module.HEAPU8.buffer, buffer, fileSize);
+  const imageBlob = new Blob([imageBuffer], { type: "image/*" })
+  const imageUrl = URL.createObjectURL(imageBlob);
+   // 找到 id 为 "preview" 的 div 元素
+   const previewDiv = document.getElementById(elementId);
+   const img = document.createElement("img");
+   img.src = imageUrl;
+   previewDiv.appendChild(img);
 }
 
 function addVideo(elementId, fileName) {
@@ -28,14 +30,20 @@ function addVideo(elementId, fileName) {
 }
 function addText(elementId, fileName) {
   console.log("addText：", fileName);
-  FS.readFile(fileName, { encoding: 'utf8' }, function(err, data) {
-    if (err) throw err;
-    console.log(data);
-    const previewDiv = document.getElementById(elementId);
-    const pre = document.createElement("pre");
-    pre.innerHTML = data;
-    previewDiv.appendChild(pre);
-  });
+  const bufferSize = 1024 * 1024;
+  const buffer = Module._malloc(bufferSize);
+  const fileSize = Module.ccall(
+    "readFile",
+    "number",
+    ["string", 'number'],
+    [fileName, buffer]
+  );
+  const cString = UTF8ToString(buffer);
+  console.log(cString);
+  const previewDiv = document.getElementById(elementId);
+  const pre = document.createElement("pre");
+  pre.innerHTML = cString;
+  previewDiv.appendChild(pre);
 }
 
 fileInput.addEventListener("change", async (event) => {
@@ -72,12 +80,11 @@ fileInput.addEventListener("change", async (event) => {
     unzipRmsFileList.forEach((item) => {
       console.log("外部文件名：", item);
     });
-    let previewId = 'preview';
+    let previewId = "preview";
     unzipRmsFileList.forEach((filename) => {
-
       const extension = filename.split(".").pop().toLowerCase();
-      if (extension === "jpg" || extension === "gif" ) {
-        // addImage(previewId, filename);
+      if (extension === "jpg" || extension === "gif") {
+        addImage(previewId, filename);
       } else if (extension === "mp4") {
         // addVideo(previewId, filename);
       } else if (extension === "txt") {

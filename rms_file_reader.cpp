@@ -12,7 +12,7 @@
 #include <iterator>
 #include <algorithm>
 #include <filesystem>
- #include <emscripten/emscripten.h>
+#include <emscripten.h>
 
 namespace fs = std::filesystem;
 
@@ -202,6 +202,22 @@ char** convertToCStringArray(const std::vector<std::string>& strings) {
   cStrings[strings.size()] = NULL;  // Add null terminator
   return cStrings;
 }
+
+void printUintPtrArray(uintptr_t* arr, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        char* currentString = reinterpret_cast<char*>(arr[i]);
+        std::cout << "arr[" << i << "] = " << currentString << std::endl;
+    }
+}
+
+std::string getFileExtension(const std::string& fileName) {
+    size_t dotIndex = fileName.find_last_of(".");
+    if (dotIndex == std::string::npos) {
+        return ""; // 文件没有后缀
+    }
+    return fileName.substr(dotIndex + 1);
+}
+
 extern "C"
 {
     EMSCRIPTEN_KEEPALIVE
@@ -243,16 +259,49 @@ extern "C"
         return NULL;
     }
 
+     EMSCRIPTEN_KEEPALIVE
+    int readFile(const char* inputRmsFilePath, char* result){
+                // Open the input file in binary mode
+        std::string ext = getFileExtension(inputRmsFilePath);
+        std::ifstream file(inputRmsFilePath, std::ios::binary);
+        if (!file) {
+            std::cerr << "Failed to open file: " << inputRmsFilePath << std::endl;
+            return 0;
+        }
+
+        // Read the contents of the file into a vector
+        std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+        // Allocate a new C-style string and copy the contents of the vector into it
+        //result = new char[buffer.size() + 1];
+        std::memcpy(result, buffer.data(), buffer.size());
+        if ((ext == "txt")) {
+            std::cout << "读文本文件: " << inputRmsFilePath << std::endl;
+            result[buffer.size()] = '\0';
+        }
+    
+        return buffer.size() + 1;
+
+    }
+
     //  EMSCRIPTEN_BINDINGS(my_module) {
     //     //  emscripten::register_vector<std::string>("VectorString");
     //      function("unzipRmsFile", &unzipRmsFile);
     //  }
 }
 
-//  int main()
-//  {
-//     system("chcp 65001");
-//     const char* inputRmsFilePath = "E:/oss_move_file/rms/file/202303301009/856079168103589461_1680142172045.rms";
-//     unzipRmsFile(inputRmsFilePath);
-//     return 0;
-//  }
+ //int main()
+ //{
+ //   system("chcp 65001");
+ //  /* const char* inputRmsFilePath = "E:/oss_move_file/rms/file/202303301009/856079168103589461_1680142172045.rms";
+ //   uintptr_t res = unzipRmsFile(inputRmsFilePath);
+ //   printUintPtrArray(&res, sizeof(res));*/
+ //   char data[2048];
+ //   //char* data;
+ //   int  res = readFile("01.txt", data);
+ //   if (res > 0) {
+ //       std::cout << "readFile: " << data << std::endl;
+ //   }
+ // 
+ //   return 0;
+ //}
