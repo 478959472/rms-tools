@@ -7,10 +7,11 @@
 #include <string>
 // #include <emscripten/emscripten.h>
 
-
 extern "C" {
     // EMSCRIPTEN_KEEPALIVE
     char* read_file(const char* file_path) {
+
+        std::cout << "file_path: " << file_path << std::endl;
         std::ifstream file(file_path, std::ios::binary | std::ios::ate);
         if (!file.is_open()) {
             std::cerr << "Error opening file: " << file_path << std::endl;

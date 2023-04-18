@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebAssembly File Reader</title>
+</head>
+<body>
+    <input type="file" id="file-input" />
+    <div>
+        <pre id="output"></pre>
+    </div>
+    <div id="preview">
+        <!-- <pre>传祺好，就是底盘好。传祺GS4双雄，搭配欧系高性能运动底盘，超级0首付，3年0利率轻松开回家，至高5000元置换补贴，别想，去享！</pre>
+        <img src="rms/03.jpg"></img>
+        <video src="rms/04.mp4" controls></video> -->
+    </div>
+    
+    <script src="rms_file_reader.js"></script>
+    <script src="rms_app.js"></script>
+    <style>
+        /* 让 #preview 元素居中显示 */
+        #preview {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          max-width: 500px; /* 等宽 */
+          margin: 0 auto; /* 居中 */
+        }
+
+        pre{
+            white-space: pre-wrap;
+            max-width: 100%; /* 不超过父元素 */
+            width: auto; /* 保持比例 */
+        }
+      
+        /* 给图片和视频添加圆角 */
+        img,
+        video {
+          border-radius: 10px;
+          max-width: 100%; /* 不超过父元素 */
+          width: auto; /* 保持比例 */
+        }
+      </style>
+</body>
+</html>
