@@ -9,5 +9,5 @@ emcc file_reader.c -s WASM=1 -s EXPORTED_FUNCTIONS="['_read_file', '_malloc', '_
 
 emcc file_reader.cpp -s WASM=1 -s EXPORTED_FUNCTIONS="['_read_file','_free_buffer']" -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap', 'getValue', 'UTF8ToString']" -o file_reader.js
 
-emcc rms_file_reader.cpp -s WASM=1 -s TOTAL_MEMORY=50MB -s WASM=1 -s EXPORTED_FUNCTIONS="['_unzipRmsFile','_readFile','_malloc']" -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap', 'getValue', 'UTF8ToString']" -o rms_file_reader.js
+emcc rms_file_reader.cpp -s WASM=1 -s WASM=1 -s EXPORTED_FUNCTIONS="['_unzipRmsFile','_readFile','_malloc','_free']" -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap', 'getValue', 'UTF8ToString']" -o rms_file_reader.js
 ```

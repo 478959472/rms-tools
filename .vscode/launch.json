@@ -4,6 +4,20 @@
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+              
+        {
+            "name": "windows Debug C++",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "C:/Users/47895/source/repos/Project1/x64/Debug/Project1.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd":  "${fileDirname}",
+            "environment": [],
+            "console": "externalTerminal",
+            // "externalConsole": true,
+            "preLaunchTask": "windowssdk build"
+          },
         {
             "name": "g++.exe - 生成和调试活动文件",
             "type": "lldb",

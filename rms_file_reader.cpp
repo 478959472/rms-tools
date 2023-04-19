@@ -27,7 +27,6 @@ public:
     int titleSize;
     std::string title;
     std::vector<std::string> fileUrlList;
-    std::map<std::string, std::vector<uint8_t>> fileContentMap;
     std::map<std::string, std::string> fileParamMap;
 
     void setIdentification(int identification) { this->identification = identification; }
@@ -39,7 +38,6 @@ public:
     void setTitle(const std::string &title) { this->title = title; }
     void setFileUrlList(const std::vector<std::string> &fileUrlList) { this->fileUrlList = fileUrlList; }
     void setFileParamMap(const std::map<std::string, std::string> &fileParamMap) { this->fileParamMap = fileParamMap; }
-    void setFileContentMap(std::map<std::string, std::vector<uint8_t>> &fileContentMap) { this->fileContentMap = fileContentMap; }
 };
 
 class RmsAnalyserImpl
@@ -90,7 +88,6 @@ public:
             rmsEntity.setTitle(title);
             std::vector<std::string> listUrl;
             std::map<std::string, std::string> fileParamMap;
-            std::map<std::string, std::vector<uint8_t>> fileContentMap;
             for (int i = 0; i < fileCount; i++)
             {
                 int fileType = bytesToInt(getByte(1, fileIn));
@@ -118,10 +115,8 @@ public:
                         continue;
                     }
                 }
-                fileContentMap.insert(std::make_pair(fileName, fileContent));
                 writeFileContent(fileName, fileContent);
             }
-            rmsEntity.setFileContentMap(fileContentMap);
             rmsEntity.setFileParamMap(fileParamMap);
             rmsEntity.setFileUrlList(listUrl);
         }
@@ -218,6 +213,7 @@ std::string getFileExtension(const std::string& fileName) {
     return fileName.substr(dotIndex + 1);
 }
 
+
 extern "C"
 {
     EMSCRIPTEN_KEEPALIVE
@@ -227,6 +223,7 @@ extern "C"
         {
        
             std::cout << "inputRmsFilePath: " << inputRmsFilePath  << std::endl;
+            //create object on the stack
             RmsAnalyserImpl analyser(inputRmsFilePath);
             RmsMetaData metaData = analyser.unzipRms();
             // std::cout << "Identification: " << metaData.identification << std::endl;
@@ -240,7 +237,7 @@ extern "C"
             std::cout << "File URLs:" << std::endl;
             for (const std::string &url : metaData.fileUrlList)
             {
-                std::cout << " 文件名： " << url << " 大小:   " << metaData.fileContentMap.at(url).size() << std::endl;
+                std::cout << " 文件名： " << url << std::endl;
             }
 
             std::cout << "File Parameter Map:" << std::endl;
@@ -249,7 +246,7 @@ extern "C"
                 std::cout << "  " << entry.first << ": " << entry.second << std::endl;
             }
             char** cStrings = convertToCStringArray(metaData.fileUrlList);
-
+            
             return reinterpret_cast<uintptr_t>(cStrings);;
         }
         catch (const std::exception &e)
@@ -275,7 +272,7 @@ extern "C"
         // Allocate a new C-style string and copy the contents of the vector into it
         //result = new char[buffer.size() + 1];
         std::memcpy(result, buffer.data(), buffer.size());
-        if ((ext == "txt")) {
+        if ((ext == "txt" || ext == "smil")) {
             std::cout << "读文本文件: " << inputRmsFilePath << std::endl;
             result[buffer.size()] = '\0';
         }
@@ -284,24 +281,20 @@ extern "C"
 
     }
 
-    //  EMSCRIPTEN_BINDINGS(my_module) {
-    //     //  emscripten::register_vector<std::string>("VectorString");
-    //      function("unzipRmsFile", &unzipRmsFile);
-    //  }
 }
 
- //int main()
- //{
- //   system("chcp 65001");
- //  /* const char* inputRmsFilePath = "E:/oss_move_file/rms/file/202303301009/856079168103589461_1680142172045.rms";
- //   uintptr_t res = unzipRmsFile(inputRmsFilePath);
- //   printUintPtrArray(&res, sizeof(res));*/
- //   char data[2048];
- //   //char* data;
- //   int  res = readFile("01.txt", data);
- //   if (res > 0) {
- //       std::cout << "readFile: " << data << std::endl;
- //   }
- // 
- //   return 0;
- //}
+//  int main()
+//  {
+//    system("chcp 65001");
+//   /* const char* inputRmsFilePath = "E:/oss_move_file/rms/file/202303301009/856079168103589461_1680142172045.rms";
+//    uintptr_t res = unzipRmsFile(inputRmsFilePath);
+//    printUintPtrArray(&res, sizeof(res));*/
+//    char data[2048];
+//    //char* data;
+//    int  res = readFile("test.txt", data);
+//    if (res > 0) {
+//        std::cout << "readFile: " << data << std::endl;
+//    }
+ 
+//    return 0;
+//  }

@@ -40,6 +40,21 @@
 			],
 			"group": "build",
 			"detail": "编译器: F:\\Qt\\Tools\\mingw1120_64\\bin\\g++.exe"
-		}
+		},
+		{
+			"label": "windowssdk build",
+			"type": "shell",
+			"command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe",
+			"args": [
+			  "/property:GenerateFullPaths=true",
+			  "/t:Build",//"${workspaceFolder}\\your_project.sln"
+			  "C:/Users/47895/source/repos/Project1/Project1.sln"
+			],
+			"group": {
+			  "kind": "build",
+			  "isDefault": true
+			}
+		  }
+		  
 	]
 }
